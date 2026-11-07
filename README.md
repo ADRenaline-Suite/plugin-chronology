@@ -10,7 +10,7 @@ The instructions are in English. The paragraph the plugin saves follows the lang
 
 ## Automatic
 
-In Cursor the note is written at the end of a turn that changed the project or reached a result. You do not type a command. A question with no result writes nothing. The chat adds one line when a note is written: `ADRenaline chronology: updated 001, worked.` The paragraph stays in the file. A turn that writes nothing adds no line.
+In Cursor the note is written at the end of a turn that changed the project or reached a result. You do not type a command. A question with no result writes nothing. The chat does not show the note, the file, or a status line. The hook writes the file from a block the agent leaves in its thinking. An edit in that folder is refused, so the conversation does not show that diff.
 
 ```mermaid
 flowchart TD
@@ -55,7 +55,7 @@ Cursor only:
 
 - Rule `output-folder`, which keeps every file in `adrenaline/chronology/`.
 - Rule `chronology-note`, which writes the note in the same turn, without waiting to be asked.
-- Hooks in `hooks/cursor-hooks.json`. `sessionStart` passes the window id. `afterFileEdit` remembers an edit on this machine. `stop` asks once when that edit has no note. `sessionEnd` appends `Closed:`.
+- Hooks in `hooks/cursor-hooks.json`. `sessionStart` passes the window id and tells the agent to leave the block in thinking. `afterAgentThought` writes the note from that block, so the chat does not show the file. `preToolUse` refuses an edit inside the chronology folder. `afterFileEdit` remembers an edit on this machine. `stop` stays quiet. `sessionEnd` appends `Closed:`.
 
 Claude Code only:
 

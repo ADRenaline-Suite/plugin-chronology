@@ -4,7 +4,7 @@
 
 ### Changed
 
-- The chat closes with one line, `ADRenaline chronology: updated <NNN>, <outcome>.`, and stays quiet when no note was written.
+- The chat stays on the request. The note is written by the `afterAgentThought` hook from a block in thinking, and an edit in the chronology folder is refused so the conversation does not show that diff.
 
 ### Added
 

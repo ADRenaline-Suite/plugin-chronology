@@ -23,14 +23,14 @@ No hay una norma ISO para la bitácora de una sesión de desarrollo. Lo que ning
 1. Una ventana, un archivo. Al cerrarla hay un párrafo. Si sigue abierta y el trabajo ya tiene otro resultado, o el último tramo es de otro día UTC, se añade un tramo al final del mismo archivo. Como máximo, dos tramos por día UTC.
 2. El número es el siguiente libre de la carpeta de esa persona. Ana y Luis empiezan los dos en `001`. El id de la ventana va dentro del archivo (`<!-- window:<id> -->`), no en la carpeta.
 3. La misma persona en dos equipos, sin haber sincronizado, puede elegir el mismo número. Al juntarlas, el archivo cuyo id de ventana no coincide pasa al siguiente libre de esa persona. El id no cambia.
-4. Un turno que no cambió el proyecto y no dejó resultado no crea archivo y el chat no lo dice. Cuando sí se escribió, el chat añade una línea: `ADRenaline chronology: updated <NNN>, <outcome>.` El párrafo se queda en el archivo. No se copia el transcript, ni un token, ni un `.env`.
+4. Un turno que no cambió el proyecto y no dejó resultado no crea archivo y el chat no lo dice. Cuando sí se escribió, el chat tampoco lo dice, salvo que la persona haya pedido la nota. El párrafo se queda en el archivo. En Cursor el hook lo escribe desde el pensamiento, y el agente no edita esa carpeta. No se copia el transcript, ni un token, ni un `.env`.
 5. La persona sale de `git config user.name`. Sin ese nombre no se inventa carpeta.
 
 ## Alcance previsto
 
 - Nota de la ventana actual: crearla o añadirle un tramo.
 - Sello `Closed:` al terminar la ventana, en Cursor.
-- Un solo recordatorio automático si hubo edición de archivo y la nota no existe.
+- Un solo recordatorio no se muestra en el chat. El hook `afterAgentThought` escribe la nota. `stop` no envía un seguimiento.
 
 ## Fuera de este plugin
 
@@ -64,7 +64,7 @@ Rules:
 
 Hooks, en archivos distintos:
 
-- Cursor: `sessionStart`, `afterFileEdit`, `stop` (un solo seguimiento), `sessionEnd`.
+- Cursor: `sessionStart`, `afterAgentThought` (escribe la nota sin mostrarla), `preToolUse` (rechaza una edición en esa carpeta), `afterFileEdit`, `stop` (en silencio), `sessionEnd`.
 - Claude Code: `SessionStart`. El sello de cierre no corre ahí. El camino portable es `/chronology-note`.
 
 ## Salida

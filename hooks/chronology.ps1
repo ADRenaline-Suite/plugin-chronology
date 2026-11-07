@@ -3,7 +3,7 @@
 # when that note is missing, and stamps the close line.
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("sessionStart", "SessionStart", "afterFileEdit", "stop", "sessionEnd")]
+    [ValidateSet("sessionStart", "SessionStart", "afterFileEdit", "afterAgentThought", "preToolUse", "stop", "sessionEnd")]
     [string]$Event
 )
 
@@ -164,9 +164,218 @@ function Add-ClosedNote([string]$StatusPath, [string]$WindowId, [string]$Reason)
     }
 }
 
+function Write-Utf8Text([string]$Path, [string]$Text) {
+    $dir = Split-Path -Parent $Path
+    if ($dir -and -not (Test-Path -LiteralPath $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+    $utf8 = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($Path, $Text, $utf8)
+}
+
+function Write-Utf8Lines([string]$Path, [string[]]$Lines) {
+    $dir = Split-Path -Parent $Path
+    if ($dir -and -not (Test-Path -LiteralPath $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+    $utf8 = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllLines($Path, $Lines, $utf8)
+}
+
+function Get-ThoughtBlock([string]$Text) {
+    if ([string]::IsNullOrWhiteSpace($Text)) { return $null }
+    $found = [regex]::Matches($Text, '(?s)<<<chronology\s*\r?\n(.*?)chronology>>>')
+    if ($found.Count -eq 0) { return $null }
+    $body = $found[$found.Count - 1].Groups[1].Value
+    $title = ""
+    $outcome = ""
+    if ($body -match '(?m)^title:\s*(.+?)\s*$') { $title = $Matches[1].Trim() }
+    if ($body -match '(?m)^outcome:\s*(worked|failed|partial)\s*$') { $outcome = $Matches[1] }
+    $split = [regex]::Split($body, "(?m)^outcome:\s*(?:worked|failed|partial)\s*\r?\n", 2)
+    $paragraph = ""
+    if ($split.Count -eq 2) { $paragraph = $split[1].Trim() }
+    $title = ($title -replace '[\r\n#|]', '').Trim()
+    if ($title.Length -gt 80) { $title = $title.Substring(0, 80).Trim() }
+    if (-not $title -or -not $outcome -or -not $paragraph) { return $null }
+    return @{ title = $title; outcome = $outcome; paragraph = $paragraph }
+}
+
+function Get-NoteSections([string]$Text) {
+    $list = New-Object System.Collections.Generic.List[object]
+    $rx = [regex]'(?m)^## (\d{4}-\d{2}-\d{2})T\d{2}:\d{2}:\d{2}Z\s+Outcome: (worked|failed|partial)\b'
+    foreach ($match in $rx.Matches($Text)) {
+        $list.Add(@{ date = $match.Groups[1].Value; outcome = $match.Groups[2].Value })
+    }
+    return ,$list
+}
+
+function Test-ShouldAppend($Sections, [string]$Outcome, [string]$Today) {
+    if ($Sections.Count -eq 0) { return $true }
+    $todayCount = @($Sections | Where-Object { $_.date -eq $Today }).Count
+    if ($todayCount -ge 2) { return $false }
+    $last = $Sections[$Sections.Count - 1]
+    if ($last.date -lt $Today) { return $true }
+    if ($last.outcome -ne $Outcome) { return $true }
+    return $false
+}
+
+function Get-NextNumber([string]$PersonDir) {
+    $max = 0
+    if (Test-Path -LiteralPath $PersonDir) {
+        Get-ChildItem -LiteralPath $PersonDir -Filter "*-chronology-*.md" -File -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($_.Name -match '^(\d+)-chronology-') {
+                $n = [int]$Matches[1]
+                if ($n -gt $max) { $max = $n }
+            }
+        }
+    }
+    return $max + 1
+}
+
+function Ensure-Origin([string]$OutputFull) {
+    $path = Join-Path $OutputFull "ORIGIN.json"
+    $expected = [ordered]@{
+        suite = "ADRenaline-Suite"
+        plugin = "plugin-chronology"
+        repository = "https://github.com/ADRenaline-Suite/plugin-chronology"
+        convention = "adr-001"
+    }
+    $write = -not (Test-Path -LiteralPath $path)
+    if (-not $write) {
+        try {
+            $current = Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
+            foreach ($key in $expected.Keys) {
+                if ([string]$current.$key -ne [string]$expected[$key]) { $write = $true }
+            }
+        } catch { $write = $true }
+    }
+    if ($write) {
+        Write-Utf8Text $path (($expected | ConvertTo-Json -Compress) + "`n")
+    }
+}
+
+function Set-StatusRow([string]$StatusPath, [string]$N, [string]$Archivo, [string]$WindowId, [string]$Outcome, [string]$Utc) {
+    $notas = "window:${WindowId}; outcome:${Outcome}; at:${Utc}"
+    $row = "| $N | $Archivo | accepted | | $notas |"
+    if (-not (Test-Path -LiteralPath $StatusPath)) {
+        Write-Utf8Lines $StatusPath @(
+            "| N | archivo | estado | sustituye | notas |",
+            "| --- | --- | --- | --- | --- |",
+            $row
+        )
+        return
+    }
+    $lines = [System.Collections.Generic.List[string]]@(Get-Content -LiteralPath $StatusPath)
+    $marker = "window:$WindowId"
+    $found = $false
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -notlike "*$marker*") { continue }
+        $closed = ""
+        if ($lines[$i] -match 'closed:([^|]*)') {
+            $stamp = $Matches[1].Trim()
+            if ($stamp) { $closed = "; closed:$stamp" }
+        }
+        $lines[$i] = "| $N | $Archivo | accepted | | $notas$closed |"
+        $found = $true
+        break
+    }
+    if (-not $found) { $lines.Add($row) }
+    Write-Utf8Lines $StatusPath $lines.ToArray()
+}
+
+function Save-ThoughtNote([string]$Root, [string]$WindowId, [string]$GenerationId, $Block) {
+    $slug = Get-PersonSlug (Get-GitName $Root)
+    if (-not $slug) { return }
+    $relative = Get-OutputDir $Root
+    $outputFull = Join-Path $Root $relative
+    $ledger = Get-LedgerPath $Root $WindowId
+    $seenDir = Split-Path -Parent $ledger
+    $seenKey = $GenerationId
+    if ([string]::IsNullOrWhiteSpace($seenKey)) {
+        $sha = [System.Security.Cryptography.SHA256]::Create()
+        $bytes = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Block.title + $Block.outcome + $Block.paragraph))
+        $seenKey = [System.BitConverter]::ToString($bytes).Replace("-", "").Substring(0, 16).ToLowerInvariant()
+    }
+    $seenKey = [regex]::Replace($seenKey, '[^A-Za-z0-9-]', '')
+    $seenPath = Join-Path $seenDir "seen-$seenKey"
+    if (Test-Path -LiteralPath $seenPath) { return }
+
+    $utc = [DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $today = $utc.Substring(0, 10)
+    $personDir = Join-Path $outputFull $slug
+    $existing = Find-Note $outputFull $WindowId
+    $section = @"
+## $utc
+
+Outcome: $($Block.outcome)
+
+$($Block.paragraph)
+"@.TrimEnd()
+
+    if ($existing) {
+        $current = [System.IO.File]::ReadAllText($existing)
+        $sections = Get-NoteSections $current
+        if (-not (Test-ShouldAppend $sections $Block.outcome $today)) {
+            Write-Utf8Text $seenPath "skipped"
+            return
+        }
+        $text = $current.TrimEnd() + "`r`n`r`n" + $section + "`r`n"
+        Write-Utf8Text $existing $text
+        $fileName = Split-Path -Leaf $existing
+        if ($fileName -match '^(\d+)-') { $n = "{0:D3}" -f [int]$Matches[1] } else { $n = "000" }
+        Set-StatusRow (Join-Path $outputFull "STATUS.md") $n "$slug/$fileName" $WindowId $Block.outcome $utc
+    } else {
+        if (-not (Test-Path -LiteralPath $personDir)) {
+            New-Item -ItemType Directory -Path $personDir -Force | Out-Null
+        }
+        $topic = Get-PersonSlug $Block.title
+        if (-not $topic) { $topic = "note" }
+        if ($topic.Length -gt 40) { $topic = $topic.Substring(0, 40).Trim('-') }
+        $n = Get-NextNumber $personDir
+        $path = $null
+        $fileName = $null
+        while ($true) {
+            $fileName = "{0:D3}-chronology-{1}.md" -f $n, $topic
+            $path = Join-Path $personDir $fileName
+            if (-not (Test-Path -LiteralPath $path)) { break }
+            $held = [System.IO.File]::ReadAllText($path)
+            if ($held.Contains("<!-- window:$WindowId -->")) { break }
+            $n++
+        }
+        $body = @"
+# $($Block.title)
+
+<!-- window:$WindowId -->
+
+$section
+
+"@
+        Write-Utf8Text $path $body
+        Set-StatusRow (Join-Path $outputFull "STATUS.md") ("{0:D3}" -f $n) "$slug/$fileName" $WindowId $Block.outcome $utc
+    }
+    Ensure-Origin $outputFull
+    Write-Utf8Text $seenPath "written"
+}
+
+function Test-ChronologyEdit($Payload, [string]$Root) {
+    $tool = [string]$Payload.tool_name
+    $writers = @("Write", "StrReplace", "Delete", "EditNotebook", "ApplyPatch")
+    if ($writers -notcontains $tool) { return $false }
+    if (-not $Payload.tool_input) { return $false }
+    $relative = Get-OutputDir $Root
+    $outputFull = Join-Path $Root $relative
+    foreach ($prop in $Payload.tool_input.PSObject.Properties) {
+        $value = [string]$prop.Value
+        if ([string]::IsNullOrWhiteSpace($value)) { continue }
+        if (Test-UnderOutput $value $outputFull) { return $true }
+    }
+    return $false
+}
+
 $payload = Get-Payload
 if (-not $payload) {
     if ($Event -eq "stop") { Write-Json @{} }
+    elseif ($Event -eq "preToolUse") { Write-Json @{ permission = "allow" } }
     exit 0
 }
 
@@ -177,7 +386,7 @@ try {
     if ($Event -eq "sessionStart" -or $Event -eq "SessionStart") {
         $slug = ""
         if ($root) { $slug = Get-PersonSlug (Get-GitName $root) }
-        $instruction = "Follow skill record-chronology and references/note.md before the reply when this turn changes the project or reaches a result. Do not wait to be asked. Do not write a transcript or a secret. When a note is written, the reply adds only the status line from that skill. Do not paste the paragraph. Add no line when no file is written."
+        $instruction = "Follow skill record-chronology and references/note.md. When this turn changes the project or reaches a result, put one chronology block in thinking and nowhere else. Do not create or edit files in the chronology folder. Do not mention the note, the path, or a status line in the reply. The reply is only what was asked. Omit the block when the turn does not qualify. Do not write a transcript or a secret. The block is <<<chronology then a line title: <topic> then a line outcome: worked or failed or partial then a blank line then one paragraph then chronology>>>."
         if ($slug) {
             $text = "ADRenaline chronology. Window id: $windowId. Person folder: $slug. $instruction"
         } else {
@@ -196,7 +405,22 @@ try {
         exit 0
     }
 
-    if (-not $root -or -not $windowId) { if ($Event -eq "stop") { Write-Json @{} }; exit 0 }
+    if ($Event -eq "preToolUse") {
+        if ($root -and (Test-ChronologyEdit $payload $root)) {
+            Write-Json @{
+                permission = "deny"
+                agent_message = "Do not edit the chronology folder. Put the chronology block only in thinking. The hook writes the file. Leave it out of the reply."
+            }
+        } else {
+            Write-Json @{ permission = "allow" }
+        }
+        exit 0
+    }
+
+    if (-not $root -or -not $windowId) {
+        if ($Event -eq "stop") { Write-Json @{} }
+        exit 0
+    }
 
     $relative = Get-OutputDir $root
     $outputFull = Join-Path $root $relative
@@ -213,21 +437,17 @@ try {
         exit 0
     }
 
-    if ($Event -eq "stop") {
-        $status = [string]$payload.status
-        $loops = 0
-        if ($payload.loop_count) { $loops = [int]$payload.loop_count }
-        $note = Find-Note $outputFull $windowId
-        if ($status -eq "completed" -and $loops -eq 0 -and (Test-Path -LiteralPath $ledger) -and -not $note) {
-            $slug = Get-PersonSlug (Get-GitName $root)
-            $who = "git user.name was not observed. Do not invent a person folder. If it is still missing, write no file."
-            if ($slug) { $who = "Person folder: $slug." }
-            Write-Json @{
-                followup_message = "Write the chronology note for this window. Follow skill record-chronology and references/note.md. Window id: $windowId. $who The paragraph goes in the file. The reply adds only the status line from that skill. If no file is written, add no chronology line."
-            }
-        } else {
-            Write-Json @{}
+    if ($Event -eq "afterAgentThought") {
+        $block = Get-ThoughtBlock ([string]$payload.text)
+        if ($block) {
+            $generation = [string]$payload.generation_id
+            Save-ThoughtNote $root $windowId $generation $block
         }
+        exit 0
+    }
+
+    if ($Event -eq "stop") {
+        Write-Json @{}
         exit 0
     }
 
@@ -242,5 +462,6 @@ try {
     }
 } catch {
     if ($Event -eq "stop") { Write-Json @{} }
+    elseif ($Event -eq "preToolUse") { Write-Json @{ permission = "allow" } }
     exit 0
 }

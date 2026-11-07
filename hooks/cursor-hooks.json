@@ -11,6 +11,17 @@
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/chronology.ps1 -Event afterFileEdit"
       }
     ],
+    "afterAgentThought": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/chronology.ps1 -Event afterAgentThought"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/chronology.ps1 -Event preToolUse",
+        "matcher": "Write|StrReplace|Delete|EditNotebook|ApplyPatch"
+      }
+    ],
     "stop": [
       {
         "command": "cmd /c powershell -NoProfile -ExecutionPolicy Bypass -File \"%CURSOR_PLUGIN_ROOT%\\hooks\\chronology.ps1\" -Event stop",

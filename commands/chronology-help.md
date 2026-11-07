@@ -29,13 +29,15 @@ Keep the section headings, in this order: Plugin, Commands, Skills, Rules, then 
 ## Rules
 
 - [**output-folder**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/rules/output-folder.mdc) — Every file goes in `adrenaline/chronology/` (or in `outputDirs["plugin-chronology"]` of `.cursor/adrenaline.json`). One file per window lives in the person's folder, and that folder has its own number.
-- [**chronology-note**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/rules/chronology-note.mdc) — The note is written in the same turn when work landed or a result was reached, without waiting to be asked.
+- [**chronology-note**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/rules/chronology-note.mdc) — The note is written in the same turn when work landed or a result was reached. In Cursor the hook writes it, and the reply stays on the request.
 
 ## Hooks
 
 - [**sessionStart**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/hooks/cursor-hooks.json) — Cursor: gives the agent the window id and the person folder from `git user.name`.
+- [**afterAgentThought**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/hooks/cursor-hooks.json) — Cursor: writes the note from the thinking block. The chat does not show the file.
+- [**preToolUse**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/hooks/cursor-hooks.json) — Cursor: refuses an edit inside the chronology folder, with no message in the chat.
 - [**afterFileEdit**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/hooks/cursor-hooks.json) — Cursor: remembers that this window edited a file outside the chronology folder. The memory stays on this machine.
-- [**stop**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/hooks/cursor-hooks.json) — Cursor: one follow-up when that edit has no note yet. It stays quiet when the note is already there.
+- [**stop**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/hooks/cursor-hooks.json) — Cursor: stays quiet. It does not send a follow-up.
 - [**sessionEnd**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/hooks/cursor-hooks.json) — Cursor: appends `Closed:` to the note of this window. It does not write the paragraph.
 - [**SessionStart**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/hooks/claude-hooks.json) — Claude Code: passes the window id. The close stamp does not run there. The portable write is `/chronology-note`.
 

@@ -10,7 +10,7 @@ Las instrucciones están en inglés. El párrafo que guarda el plugin sigue el i
 
 ## Automático
 
-En Cursor la nota se escribe al final de un turno que cambió el proyecto o dejó un resultado. No escribes un comando. Una pregunta sin resultado no crea archivo. El chat añade una línea cuando se escribió la nota: `ADRenaline chronology: updated 001, worked.` El párrafo se queda en el archivo. Un turno que no escribe no añade línea.
+En Cursor la nota se escribe al final de un turno que cambió el proyecto o dejó un resultado. No escribes un comando. Una pregunta sin resultado no crea archivo. El chat no muestra la nota, el archivo ni una línea de estado. El hook escribe el archivo desde un bloque que el agente deja en su pensamiento. Una edición en esa carpeta se rechaza, así el chat no muestra ese diff.
 
 ```mermaid
 flowchart TD
@@ -55,7 +55,7 @@ Solo Cursor:
 
 - Rule `output-folder`, que deja cada archivo en `adrenaline/chronology/`.
 - Rule `chronology-note`, que escribe la nota en el mismo turno, sin esperar a que se pida.
-- Hooks en `hooks/cursor-hooks.json`. `sessionStart` pasa el id de la ventana. `afterFileEdit` recuerda una edición en esta máquina. `stop` pregunta una vez cuando esa edición no tiene nota. `sessionEnd` añade `Closed:`.
+- Hooks en `hooks/cursor-hooks.json`. `sessionStart` pasa el id de la ventana y pide dejar el bloque en el pensamiento. `afterAgentThought` escribe la nota desde ese bloque, así el chat no muestra el archivo. `preToolUse` rechaza una edición dentro de la carpeta de cronología. `afterFileEdit` recuerda una edición en esta máquina. `stop` se queda callado. `sessionEnd` añade `Closed:`.
 
 Solo Claude Code:
 
