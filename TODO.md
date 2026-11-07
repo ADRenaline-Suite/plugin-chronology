@@ -23,7 +23,7 @@ No hay una norma ISO para la bitácora de una sesión de desarrollo. Lo que ning
 1. Una ventana, un archivo. Al cerrarla hay un párrafo. Si sigue abierta y el trabajo ya tiene otro resultado, o el último tramo es de otro día UTC, se añade un tramo al final del mismo archivo. Como máximo, dos tramos por día UTC.
 2. El número es el siguiente libre de la carpeta de esa persona. Ana y Luis empiezan los dos en `001`. El id de la ventana va dentro del archivo (`<!-- window:<id> -->`), no en la carpeta.
 3. La misma persona en dos equipos, sin haber sincronizado, puede elegir el mismo número. Al juntarlas, el archivo cuyo id de ventana no coincide pasa al siguiente libre de esa persona. El id no cambia.
-4. Un turno que no cambió el proyecto y no dejó resultado no crea archivo. No se copia el transcript, ni un token, ni un `.env`.
+4. Un turno que no cambió el proyecto y no dejó resultado no crea archivo y el chat no lo dice. Cuando sí se escribió, el chat añade una línea: `ADRenaline chronology: updated <NNN>, <outcome>.` El párrafo se queda en el archivo. No se copia el transcript, ni un token, ni un `.env`.
 5. La persona sale de `git config user.name`. Sin ese nombre no se inventa carpeta.
 
 ## Alcance previsto

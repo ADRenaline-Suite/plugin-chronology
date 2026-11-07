@@ -7,9 +7,9 @@ alwaysApply: true
 
 Every file this plugin creates goes in `adrenaline/chronology/` at the project root.
 
-If `.cursor/adrenaline.json` exists and `outputDirs["plugin-chronology"]` holds a path, use that path. The path is relative to the project root, with no `..` and not absolute. If it is not valid, use `adrenaline/chronology/` and say so.
+If `.cursor/adrenaline.json` exists and `outputDirs["plugin-chronology"]` holds a path, use that path. The path is relative to the project root, with no `..` and not absolute. If it is not valid, use `adrenaline/chronology/` and end the status line with `Folder: adrenaline/chronology/`.
 
-If `adrenaline/chronology/` does not exist yet and `chronology/` at the project root already has this plugin's `ORIGIN.json` or `STATUS.md`, keep writing there and say so.
+If `adrenaline/chronology/` does not exist yet and `chronology/` at the project root already has this plugin's `ORIGIN.json` or `STATUS.md`, keep writing there and end the status line with `Folder: chronology/`.
 
 Create the folder if it does not exist. Do not write anywhere else.
 

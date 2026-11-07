@@ -2,6 +2,10 @@
 
 ## [0.0.1] - 2026-11-07
 
+### Changed
+
+- The chat closes with one line, `ADRenaline chronology: updated <NNN>, <outcome>.`, and stays quiet when no note was written.
+
 ### Added
 
 - One chronology note per chat window in `adrenaline/chronology/<person>/`. The number restarts in that person's folder. The window id stays inside the file.

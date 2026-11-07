@@ -10,3 +10,5 @@ Before the reply, read `skills/record-chronology/SKILL.md` and `skills/record-ch
 When this turn changed the project or reached a result, write or update the note for this window. Do not wait to be asked. A question that did not change the project and did not reach a result writes nothing.
 
 Do not write the transcript. Do not write a secret, a token, or the contents of an env file. The same window keeps the same file. At most two sections per UTC day. A missing `git config user.name` skips the note and does not invent a folder.
+
+When a note was written, the reply adds one line: `ADRenaline chronology: updated <NNN>, <outcome>.` It does not paste the paragraph. When no file was written, add no line. A missing name adds `ADRenaline chronology: skipped, missing git user.name.`

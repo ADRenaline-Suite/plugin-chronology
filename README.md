@@ -10,7 +10,7 @@ The instructions are in English. The paragraph the plugin saves follows the lang
 
 ## Automatic
 
-In Cursor the note is written at the end of a turn that changed the project or reached a result. You do not type a command. A question with no result writes nothing.
+In Cursor the note is written at the end of a turn that changed the project or reached a result. You do not type a command. A question with no result writes nothing. The chat adds one line when a note is written: `ADRenaline chronology: updated 001, worked.` The paragraph stays in the file. A turn that writes nothing adds no line.
 
 ```mermaid
 flowchart TD

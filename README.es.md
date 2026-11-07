@@ -10,7 +10,7 @@ Las instrucciones están en inglés. El párrafo que guarda el plugin sigue el i
 
 ## Automático
 
-En Cursor la nota se escribe al final de un turno que cambió el proyecto o dejó un resultado. No escribes un comando. Una pregunta sin resultado no crea archivo.
+En Cursor la nota se escribe al final de un turno que cambió el proyecto o dejó un resultado. No escribes un comando. Una pregunta sin resultado no crea archivo. El chat añade una línea cuando se escribió la nota: `ADRenaline chronology: updated 001, worked.` El párrafo se queda en el archivo. Un turno que no escribe no añade línea.
 
 ```mermaid
 flowchart TD

@@ -8,7 +8,7 @@ Una ventana de chat es un archivo. El archivo dice qué se intentó en este proy
 
 Se escribe al final de un turno que cambió el proyecto o dejó un resultado. No se espera a que se pida. El hook `sessionStart` de Cursor puede haber dado ya el id de la ventana y la carpeta de la persona. Usa esos valores cuando coinciden con este procedimiento. Si el hook no corrió, resuélvelos tú.
 
-No crees archivo cuando el turno no cambió el proyecto y no llegó a `worked`, `failed` o `partial`. Una pregunta sin resultado es un salto. Di que no se escribió nota.
+No crees archivo cuando el turno no cambió el proyecto y no llegó a `worked`, `failed` o `partial`. Una pregunta sin resultado es un salto. No añadas línea de cronología.
 
 ## Persona
 
@@ -72,6 +72,8 @@ Actualiza `outcome` y `at` al último tramo. No pongas `|` en `notas`. Deja `sus
 
 ## Prompt cuando falta el nombre
 
+La respuesta no imprime este prompt. Un nombre que falta usa la línea de estado del skill.
+
 ```text
 Fija git user.name y vuelve a pedir la nota de cronología. Id de ventana: #…
 ```
@@ -83,4 +85,4 @@ Fija git user.name y vuelve a pedir la nota de cronología. Id de ventana: #…
 - Este día UTC tiene como máximo dos tramos en ese archivo. Un tramo anterior sigue legible.
 - `<NNN>` es el siguiente libre de la carpeta de esa persona, o el número que el comentario de esta ventana ya tenía.
 - La fila de `STATUS.md` de este archivo está `accepted`, `sustituye` está vacío, y `notas` tiene `window:`, `outcome:` y `at:` sin `|`.
-- Un turno que no cambió el proyecto y no dejó un resultado no escribió archivo.
+- Un turno que no cambió el proyecto y no dejó un resultado no escribió archivo y no añadió línea de cronología.

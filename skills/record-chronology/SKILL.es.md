@@ -21,22 +21,23 @@ Fuente: Sam Bleckley, Lab Notebooks (https://sambleckley.com/writing/lab-noteboo
 
 ## Idioma
 
-Las instrucciones de la página en inglés son las que lee el agente. El párrafo sigue el idioma del pedido. Si el pedido nombra un idioma, se usa ese. Si no, se usa el idioma en el que está escrito el pedido. Se conservan los nombres que la persona ya usó. El tipo del nombre de archivo sigue siendo `chronology`. Las columnas de `STATUS.md` siguen `N`, `archivo`, `estado`, `sustituye`, `notas`. La respuesta usa ese mismo idioma. Las etiquetas `Outcome:` y `Closed:`, y el comentario `<!-- window:<id> -->`, siguen en inglés.
+Las instrucciones de la página en inglés son las que lee el agente. El párrafo sigue el idioma del pedido. Si el pedido nombra un idioma, se usa ese. Si no, se usa el idioma en el que está escrito el pedido. Se conservan los nombres que la persona ya usó. El tipo del nombre de archivo sigue siendo `chronology`. Las columnas de `STATUS.md` siguen `N`, `archivo`, `estado`, `sustituye`, `notas`. La respuesta usa ese mismo idioma. La línea de estado, las etiquetas `Outcome:` y `Closed:`, y el comentario `<!-- window:<id> -->`, siguen en inglés.
 
 ## Cuando falta un prerrequisito
 
 Hace falta `git config user.name`. Si falta, no se escribe archivo de cronología.
 
-Cuando `/chronology-note` es todo el pedido, la respuesta es solo esto, en el idioma del pedido:
+La respuesta añade esta línea y nada más sobre la nota:
 
-1. «Falta:» y `git user.name`.
-2. «En un mensaje:» y el prompt de [note.es.md](references/note.es.md).
+```text
+ADRenaline chronology: skipped, missing git user.name.
+```
 
-Cuando la nota va al final de otra tarea, no sustituyas la respuesta de esa tarea. Añade una frase: la nota no se escribió porque falta `git user.name`.
+Cuando la nota va al final de otra tarea, no sustituyas la respuesta de esa tarea. Añade esa línea.
 
 ## Entrega
 
-La carpeta es `adrenaline/chronology/` en la raíz del proyecto. Si `.cursor/adrenaline.json` tiene `outputDirs["plugin-chronology"]` con una ruta relativa, sin `..` y no absoluta, se usa esa ruta. Si falta el archivo, la clave o una ruta válida, se usa `adrenaline/chronology/` y, en el último caso, se dice. Si `adrenaline/chronology/` aún no existe y `chronology/` en la raíz ya tiene el `ORIGIN.json` o el `STATUS.md` de este plugin, se sigue escribiendo ahí y se dice. Crea la carpeta si no existe. No escribas fuera de ella.
+La carpeta es `adrenaline/chronology/` en la raíz del proyecto. Si `.cursor/adrenaline.json` tiene `outputDirs["plugin-chronology"]` con una ruta relativa, sin `..` y no absoluta, se usa esa ruta. Si falta el archivo, la clave o una ruta válida, se usa `adrenaline/chronology/` y, en el último caso, la línea de estado termina con `Folder: adrenaline/chronology/`. Si `adrenaline/chronology/` aún no existe y `chronology/` en la raíz ya tiene el `ORIGIN.json` o el `STATUS.md` de este plugin, se sigue escribiendo ahí y la línea de estado termina con `Folder: chronology/`. Crea la carpeta si no existe. No escribas fuera de ella.
 
 La carpeta de la persona es `git config user.name` en kebab-case, como dice [note.es.md](references/note.es.md). No inventes una persona. `<NNN>` es el siguiente entero libre, con tres dígitos, en la carpeta de esa persona, y no se reutiliza. La carpeta de otra persona tiene su propia cuenta. El archivo es `<persona>/<NNN>-chronology-<tema>.md`. Una ventana de chat es un archivo. Un tramo posterior de la misma ventana se añade a ese archivo. La celda `archivo` es `<persona>/<archivo>`.
 
@@ -44,7 +45,15 @@ Mantén `<carpeta>/STATUS.md` con columnas `N`, `archivo`, `estado`, `sustituye`
 
 Mantén `<carpeta>/ORIGIN.json` junto a `STATUS.md`. No es un archivo `<NNN>` y no tiene fila en `STATUS.md`. Se escribe al crear la carpeta. En una entrega posterior se vuelve a escribir solo si falta o si un campo difiere. Los campos son `suite` `ADRenaline-Suite`, `plugin` `plugin-chronology`, `repository` `https://github.com/ADRenaline-Suite/plugin-chronology` y `convention` `adr-001`. El marcador nombra la carpeta. No dice que cada archivo de dentro siga sin cambios.
 
-Una ventana nueva es el siguiente `<NNN>` de esa persona y nace `accepted`. La misma ventana conserva su `<NNN>` y sigue `accepted` cuando se añade un tramo. Al cerrar, di la carpeta, el archivo, el `N` y el estado. Si el turno no calificaba, di que no se escribió nota.
+Una ventana nueva es el siguiente `<NNN>` de esa persona y nace `accepted`. La misma ventana conserva su `<NNN>` y sigue `accepted` cuando se añade un tramo. Si se escribió la nota o se añadió un tramo, la respuesta añade una línea. No nombra la carpeta, el archivo ni el estado, y no pega el párrafo:
+
+```text
+ADRenaline chronology: updated 001, worked.
+```
+
+`001` es ese `<NNN>`. La última palabra es el resultado del último tramo: `worked`, `failed` o `partial`. La línea se queda en inglés. Si el turno no escribió archivo, no se añade línea.
+
+Si la carpeta usada es la ruta vieja `chronology/`, o una ruta no válida de `outputDirs` cayó en `adrenaline/chronology/`, esa misma línea termina con `Folder: <ruta>`. Una ruta propia válida no la añade.
 
 ## Hecho
 
@@ -56,10 +65,10 @@ Antes de cerrar, evalúa esta lista y la lista `## Done` de la referencia de est
 - El idioma del artefacto coincide con el pedido. Las columnas de `STATUS.md` siguen `N`, `archivo`, `estado`, `sustituye`, `notas`.
 - Cada campo que la plantilla pide está lleno. No queda un hueco (`#…`, `<task>`, `TBD`, lorem ipsum).
 - No se añadió nada que este skill prohíbe. La referencia dice qué queda fuera.
-- La respuesta nombra la carpeta, los archivos, el `N` y el estado.
+- La respuesta añade `ADRenaline chronology: updated <NNN>, <outcome>.` y ni ruta, ni párrafo, ni la palabra de estado. Un turno que no escribió archivo no añade línea. Si falta `git user.name`, añade `ADRenaline chronology: skipped, missing git user.name.` Una carpeta vieja o una ruta no válida añade `Folder: <ruta>` en la línea de actualización.
 
 ## Ejemplo
 
 Entrada: el pedido está en español, en un proyecto llamado `tienda`. `git config user.name` es `Ana`. El id de la ventana es `a1f3c9`. Este turno cambió la comprobación del login. La contraseña correcta siguió rechazada después de bajar las rondas de bcrypt. Ninguna nota anterior contiene `<!-- window:a1f3c9 -->`. La carpeta de Ana no tiene archivos de cronología.
 
-Salida `accepted`: `adrenaline/chronology/ana/001-chronology-login.md`, con `Outcome: failed` y un párrafo en español. `STATUS.md` tiene `N` `001`, `archivo` `ana/001-chronology-login.md`, `estado` `accepted`, `sustituye` vacío y `notas` `window:a1f3c9; outcome:failed; at:<la hora del tramo>`. La respuesta nombra esa carpeta, ese archivo, `001` y `accepted`.
+Salida `accepted`: `adrenaline/chronology/ana/001-chronology-login.md`, con `Outcome: failed` y un párrafo en español. `STATUS.md` tiene `N` `001`, `archivo` `ana/001-chronology-login.md`, `estado` `accepted`, `sustituye` vacío y `notas` `window:a1f3c9; outcome:failed; at:<la hora del tramo>`. La respuesta es `ADRenaline chronology: updated 001, failed.`

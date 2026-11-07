@@ -8,7 +8,7 @@ One chat window is one file. The file says what was tried in this project and wh
 
 Write at the end of a turn that changed the project or reached a result. Do not wait to be asked. Cursor's `sessionStart` hook may already have given the window id and the person folder. Use those values when they match this procedure. When the hook did not run, resolve them yourself.
 
-Skip the file when the turn did not change the project and did not reach `worked`, `failed`, or `partial`. A question with no result is a skip. Say that no note was written.
+Skip the file when the turn did not change the project and did not reach `worked`, `failed`, or `partial`. A question with no result is a skip. Add no chronology line.
 
 ## Person
 
@@ -72,6 +72,8 @@ Update `outcome` and `at` to the latest section. Do not put `|` in `notas`. Leav
 
 ## Prompt when the name is missing
 
+The reply does not print this prompt. A missing name uses the status line in the skill.
+
 ```text
 Set git user.name and ask again for the chronology note. Window id: #…
 ```
@@ -83,4 +85,4 @@ Set git user.name and ask again for the chronology note. Window id: #…
 - This UTC day has at most two sections in that file. An earlier section is still readable.
 - `<NNN>` is the next free number in that person's folder, or the number the existing window comment already had.
 - The `STATUS.md` row for this file is `accepted`, `sustituye` is empty, and `notas` has `window:`, `outcome:`, and `at:` with no `|`.
-- A turn that did not change the project and did not reach a result wrote no file.
+- A turn that did not change the project and did not reach a result wrote no file and added no chronology line.

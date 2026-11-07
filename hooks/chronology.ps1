@@ -177,7 +177,7 @@ try {
     if ($Event -eq "sessionStart" -or $Event -eq "SessionStart") {
         $slug = ""
         if ($root) { $slug = Get-PersonSlug (Get-GitName $root) }
-        $instruction = "Follow skill record-chronology and references/note.md before the reply when this turn changes the project or reaches a result. Do not wait to be asked. Do not write a transcript or a secret."
+        $instruction = "Follow skill record-chronology and references/note.md before the reply when this turn changes the project or reaches a result. Do not wait to be asked. Do not write a transcript or a secret. When a note is written, the reply adds only the status line from that skill. Do not paste the paragraph. Add no line when no file is written."
         if ($slug) {
             $text = "ADRenaline chronology. Window id: $windowId. Person folder: $slug. $instruction"
         } else {
@@ -223,7 +223,7 @@ try {
             $who = "git user.name was not observed. Do not invent a person folder. If it is still missing, write no file."
             if ($slug) { $who = "Person folder: $slug." }
             Write-Json @{
-                followup_message = "Write the chronology note for this window. Follow skill record-chronology and references/note.md. Window id: $windowId. $who One paragraph of what was tried and whether it worked. If this window did not change the project and did not reach a result, write no file."
+                followup_message = "Write the chronology note for this window. Follow skill record-chronology and references/note.md. Window id: $windowId. $who The paragraph goes in the file. The reply adds only the status line from that skill. If no file is written, add no chronology line."
             }
         } else {
             Write-Json @{}
