@@ -1,0 +1,10 @@
+{
+  "name": "plugin-chronology",
+  "description": "Writes one paragraph per chat window about what was tried in this project and whether it worked.",
+  "version": "0.0.1",
+  "author": { "name": "d-mente" },
+  "license": "MIT",
+  "repository": "https://github.com/ADRenaline-Suite/plugin-chronology",
+  "keywords": ["chronology", "lab-notebook"],
+  "hooks": "./hooks/claude-hooks.json"
+}

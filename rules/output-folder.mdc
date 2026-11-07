@@ -1,0 +1,20 @@
+---
+description: Folder where this plugin writes one note per chat window
+alwaysApply: true
+---
+
+# Output folder
+
+Every file this plugin creates goes in `adrenaline/chronology/` at the project root.
+
+If `.cursor/adrenaline.json` exists and `outputDirs["plugin-chronology"]` holds a path, use that path. The path is relative to the project root, with no `..` and not absolute. If it is not valid, use `adrenaline/chronology/` and say so.
+
+If `adrenaline/chronology/` does not exist yet and `chronology/` at the project root already has this plugin's `ORIGIN.json` or `STATUS.md`, keep writing there and say so.
+
+Create the folder if it does not exist. Do not write anywhere else.
+
+`ORIGIN.json` and `STATUS.md` stay at that folder's root. One chat window is one file in `<person>/`. `<person>` is `git config user.name` in kebab-case: lowercase, accents folded (á to a, ñ to n), spaces to hyphens, other characters dropped. `<NNN>` is the next free number in that person's folder, not in the whole output folder. The `archivo` cell is `<person>/<file>`. The same `N` may appear for two people. The window id is the HTML comment `<!-- window:<id> -->` inside the file. This exception is the 2026-11-07 amendment of `doc/arch/adr-008-asunto-subcarpeta.md`.
+
+Write the paragraph in the language of the request. If the request names a language, use that one. Otherwise use the language the request is written in. Keep names the person already used. The type in the file name stays `chronology`. `STATUS.md` columns stay `N`, `archivo`, `estado`, `sustituye`, `notas`. The labels `Outcome:` and `Closed:`, and the window comment, stay in English.
+
+Keep `ORIGIN.json` in that folder, beside `STATUS.md`. The fields are `suite` `ADRenaline-Suite`, `plugin` `plugin-chronology`, `repository` `https://github.com/ADRenaline-Suite/plugin-chronology`, and `convention` `adr-001`. It is not an `<NNN>` file and it has no row in `STATUS.md`. Write it when the folder is created, and again only if it is missing or a field differs. The marker names the folder. It does not say that each file inside is unchanged.

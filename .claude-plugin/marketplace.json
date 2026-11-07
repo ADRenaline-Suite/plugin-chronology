@@ -1,0 +1,16 @@
+{
+  "name": "plugin-chronology",
+  "owner": {
+    "name": "ADRenaline Suite"
+  },
+  "metadata": {
+    "description": "Marketplace with the Chronology plugin."
+  },
+  "plugins": [
+    {
+      "name": "plugin-chronology",
+      "source": "./",
+      "description": "Writes one paragraph per chat window about what was tried in this project and whether it worked."
+    }
+  ]
+}

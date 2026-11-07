@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/chronology.ps1 -Event sessionStart"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/chronology.ps1 -Event afterFileEdit"
+      }
+    ],
+    "stop": [
+      {
+        "command": "cmd /c powershell -NoProfile -ExecutionPolicy Bypass -File \"%CURSOR_PLUGIN_ROOT%\\hooks\\chronology.ps1\" -Event stop",
+        "loop_limit": 1
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./hooks/chronology.ps1 -Event sessionEnd"
+      }
+    ]
+  }
+}

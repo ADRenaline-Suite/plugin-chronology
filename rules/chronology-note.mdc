@@ -1,0 +1,12 @@
+---
+description: Writes the chronology note in the same turn when work landed, without waiting to be asked
+alwaysApply: true
+---
+
+# Chronology note
+
+Before the reply, read `skills/record-chronology/SKILL.md` and `skills/record-chronology/references/note.md`.
+
+When this turn changed the project or reached a result, write or update the note for this window. Do not wait to be asked. A question that did not change the project and did not reach a result writes nothing.
+
+Do not write the transcript. Do not write a secret, a token, or the contents of an env file. The same window keeps the same file. At most two sections per UTC day. A missing `git config user.name` skips the note and does not invent a folder.

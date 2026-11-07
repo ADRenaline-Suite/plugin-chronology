@@ -1,0 +1,65 @@
+---
+name: record-chronology
+description: Writes one paragraph per chat window about what was tried in this project and whether it worked. Use it at the end of a turn that changed the project or reached a result, without waiting to be asked, and when someone asks for the chronology note.
+---
+
+<p align="right">Language:&emsp;<img alt="English" src="https://raw.githubusercontent.com/ADRenaline-Suite/.github/main/profile/lang-en-on.svg" align="middle" style="vertical-align:middle"> <a href="SKILL.es.md" style="vertical-align:middle"><img alt="Español" src="https://raw.githubusercontent.com/ADRenaline-Suite/.github/main/profile/lang-es-off.svg" align="middle" style="vertical-align:middle"></a></p>
+
+[🏠 Chronology](../../README.md)
+
+# Record the chronology
+
+Write one note for this chat window: what was tried in this project and whether it worked. The note is for the project where this plugin is installed. A failed attempt that never became a commit stays in the note.
+
+Source: Sam Bleckley, Lab Notebooks (https://sambleckley.com/writing/lab-notebooks.html); Joseph Hallenbeck, Lab Notebooks & Software Development (https://joehallenbeck.com/lab-notebooks-and-software-development/). There is no ISO standard for this record. The Cursor hook behavior is the vendor mechanism (https://cursor.com/docs/hooks), not the lab-notebook practice.
+
+## Before writing
+
+1. Read only [note.md](references/note.md).
+2. `/chronology-note` fixes this situation. A turn that changed the project or reached a result does the same, without waiting to be asked.
+3. Do not copy the transcript. Do not write a secret, a token, or the contents of an env file. Do not write the architecture decision, the project picture, or a diagram. Ask that plugin when the request is its artifact.
+
+## Language
+
+The instructions stay in English. Write the paragraph in the language of the request. If the request names a language, use that one. Otherwise use the language the request is written in. Keep names the person already used. The type in the file name stays `chronology`. `STATUS.md` columns stay `N`, `archivo`, `estado`, `sustituye`, `notas`. The reply uses that same language. The labels `Outcome:` and `Closed:`, and the comment `<!-- window:<id> -->`, stay in English.
+
+## When a prerequisite is missing
+
+`git config user.name` is required. When it is missing, write no chronology file.
+
+When `/chronology-note` is the whole request, reply with only this, in the language of the request:
+
+1. "Missing:" and `git user.name`.
+2. "In one message:" and the prompt from [note.md](references/note.md).
+
+When the note rides at the end of another task, do not replace that task's reply. Add one sentence that the note was skipped because `git user.name` is missing.
+
+## Delivery
+
+The folder is `adrenaline/chronology/` at the project root. If `.cursor/adrenaline.json` has `outputDirs["plugin-chronology"]` set to a relative path, without `..` and not absolute, use that path. If the file, the key, or a valid path is missing, use `adrenaline/chronology/` and, in the last case, say so. If `adrenaline/chronology/` does not exist yet and `chronology/` at the project root already has this plugin's `ORIGIN.json` or `STATUS.md`, keep writing there and say so. Create the folder if it does not exist. Do not write outside it.
+
+The person folder is `git config user.name` made kebab-case, as [note.md](references/note.md) says. Do not invent a person. `<NNN>` is the next free integer, three digits, in that person's folder, and it is not reused. Another person's folder has its own count. The file is `<person>/<NNN>-chronology-<topic>.md`. One chat window is one file. A later section of the same window is appended to that file. The `archivo` cell is `<person>/<file>`.
+
+Keep `<folder>/STATUS.md` with columns `N`, `archivo`, `estado`, `sustituye`, and `notas`. `N` is the number in that person's folder. The same `N` may appear on two rows when the people differ. `sustituye` stays empty: an older note stays `accepted`. `notas` is `window:<id>; outcome:<worked|failed|partial>; at:<UTC>` and must not contain `|`.
+
+Keep `<folder>/ORIGIN.json` beside `STATUS.md`. It is not an `<NNN>` file and it has no row in `STATUS.md`. Write it when the folder is created. On a later delivery, write it again only when it is missing or a field differs. The fields are `suite` `ADRenaline-Suite`, `plugin` `plugin-chronology`, `repository` `https://github.com/ADRenaline-Suite/plugin-chronology`, and `convention` `adr-001`. The marker names the folder. It does not say that each file inside is unchanged.
+
+A new window is the next `<NNN>` of that person and starts `accepted`. The same window keeps its `<NNN>` and stays `accepted` when a section is appended. When you close, say the folder, the file, the `N`, and the state. When the turn did not qualify, say that no note was written.
+
+## Done
+
+Before you close, evaluate this list and the `## Done` list in the reference for this situation. A command fixes the situation: use the reference that command names. Every item is true, or you fix the delivery in this turn. Do not leave a file that fails an item. Do not mark it `accepted` while an item fails. A template the reference names is applied and recorded under Assumed; the delivery uses the state that reference names. A prerequisite that still stops the delivery is not a failed list: follow "When a prerequisite is missing" and write no files for that piece.
+
+- The only file this skill adds is the chronology note, or it adds nothing when the turn did not change the project and did not reach a result.
+- Files are only in the output folder, named as Delivery says. `<NNN>` is not reused inside that person's folder. `STATUS.md` matches the files and the state this situation allows.
+- `ORIGIN.json` is in the output folder. Its four fields match this plugin. It has no row in `STATUS.md`.
+- The artifact language matches the request. `STATUS.md` columns stay `N`, `archivo`, `estado`, `sustituye`, `notas`.
+- Every field the template requires is filled. No placeholder remains (`#…`, `<task>`, `TBD`, lorem ipsum). A field the reference tells you to leave blank until data arrives is blank on purpose, and the state is the one the reference names.
+- Nothing this skill forbids was added. The reference names what stays out.
+- The reply names the folder, the files, the `N`, and the state. If a template was applied, the reply ends with the Assumed block, one line per template, naming the command that changes it and the command that regenerates this piece. A blank left on purpose names the command that fills it.
+
+## Example
+
+Input: the request is in Spanish, in a project called `tienda`. `git config user.name` is `Ana`. The window id is `a1f3c9`. This turn changed the login check. The correct password was still rejected after lowering the bcrypt rounds. No earlier note contains `<!-- window:a1f3c9 -->`. Ana's folder has no chronology files.
+
+`accepted` output: `adrenaline/chronology/ana/001-chronology-login.md`, with `Outcome: failed` and one Spanish paragraph. `STATUS.md` has `N` `001`, `archivo` `ana/001-chronology-login.md`, `estado` `accepted`, `sustituye` empty, and `notas` `window:a1f3c9; outcome:failed; at:<the section timestamp>`. The reply names that folder, that file, `001`, and `accepted`.
