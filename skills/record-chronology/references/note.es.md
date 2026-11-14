@@ -88,3 +88,4 @@ Fija git user.name y vuelve a pedir la nota de cronología. Id de ventana: #…
 - `<NNN>` es el siguiente libre de la carpeta de esa persona, o el número que el comentario de esta ventana ya tenía.
 - La fila de `STATUS.md` de este archivo está `accepted`, `sustituye` está vacío, y `notas` tiene `window:`, `outcome:` y `at:` sin `|`.
 - Un turno que no cambió el proyecto y no dejó un resultado no escribió archivo, no añadió línea de cronología y no puso el bloque en el pensamiento. En Cursor el agente no creó ni editó los archivos de cronología.
+- Una línea que dice `updated` usa el `<NNN>` del archivo que ya contiene el id de esta ventana. Si ese archivo no está, la línea fue `ADRenaline chronology: missing note.` y no se eligió el número siguiente.

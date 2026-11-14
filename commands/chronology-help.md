@@ -1,6 +1,6 @@
 ---
 name: chronology-help
-description: "ADRenaline. Help: catalog of plugin-chronology (skills, rules, commands)."
+description: "ADRenaline. Help: catalog of plugin-chronology (skills, rules, commands, agents)."
 ---
 
 # Help — ADRenaline Chronology
@@ -30,6 +30,10 @@ Keep the section headings, in this order: Plugin, Commands, Skills, Rules, then 
 
 - [**output-folder**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/rules/output-folder.mdc) — Every file goes in `adrenaline/chronology/` (or in `outputDirs["plugin-chronology"]` of `.cursor/adrenaline.json`). One file per window lives in the person's folder, and that folder has its own number.
 - [**chronology-note**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/rules/chronology-note.mdc) — The note is written in the same turn when work landed or a result was reached. In Cursor the hook writes it, and the reply stays on the request.
+
+## Agents
+
+- [**plugin-chronology**](https://github.com/ADRenaline-Suite/plugin-chronology/blob/main/agents/plugin-chronology.md) — Use at the end of a turn that changed the project or reached a result, and when someone asks for the chronology note.
 
 ## Hooks
 

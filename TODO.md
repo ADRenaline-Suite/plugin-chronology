@@ -30,7 +30,7 @@ No hay una norma ISO para la bitácora de una sesión de desarrollo. Lo que ning
 
 - Nota de la ventana actual: crearla o añadirle un tramo.
 - Sello `Closed:` al terminar la ventana, en Cursor.
-- Un solo recordatorio no se muestra en el chat. El hook `afterAgentThought` escribe la nota. `stop` no envía un seguimiento.
+- Un solo recordatorio no se muestra en el chat. El hook `afterAgentThought` escribe la nota. `stop` no envía un seguimiento. Si esa ventana cambió un archivo y no hay nota, `stop` escribe una nota `partial`. Un bloque posterior de la misma ventana la sustituye.
 
 ## Fuera de este plugin
 

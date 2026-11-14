@@ -51,6 +51,8 @@ Cursor and Claude Code:
 
 - Two commands: `/chronology-help` and `/chronology-note`. In Cursor, `/chronology-note`. In Claude Code, `/plugin-chronology:chronology-note`.
 
+- One agent, `plugin-chronology`. It follows this plugin's skills and names when to ask another plugin. The method stays in the skill.
+
 Cursor only:
 
 - Rule `output-folder`, which keeps every file in `adrenaline/chronology/`.

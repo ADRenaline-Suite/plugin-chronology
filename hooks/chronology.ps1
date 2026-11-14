@@ -314,6 +314,23 @@ $($Block.paragraph)
 
     if ($existing) {
         $current = [System.IO.File]::ReadAllText($existing)
+        if ($current.Contains("<!-- hook:placeholder -->")) {
+            $replaced = @"
+# $($Block.title)
+
+<!-- window:$WindowId -->
+
+$section
+
+"@
+            Write-Utf8Text $existing $replaced
+            $fileName = Split-Path -Leaf $existing
+            if ($fileName -match '^(\d+)-') { $n = "{0:D3}" -f [int]$Matches[1] } else { $n = "000" }
+            Set-StatusRow (Join-Path $outputFull "STATUS.md") $n "$slug/$fileName" $WindowId $Block.outcome $utc
+            Ensure-Origin $outputFull
+            Write-Utf8Text $seenPath "written"
+            return
+        }
         $sections = Get-NoteSections $current
         if (-not (Test-ShouldAppend $sections $Block.outcome $today)) {
             Write-Utf8Text $seenPath "skipped"
@@ -355,6 +372,63 @@ $section
     }
     Ensure-Origin $outputFull
     Write-Utf8Text $seenPath "written"
+}
+
+function Get-LedgerPaths([string]$Ledger) {
+    $list = New-Object System.Collections.Generic.List[string]
+    if (Test-Path -LiteralPath $Ledger) {
+        $raw = [System.IO.File]::ReadAllText($Ledger)
+        foreach ($line in ($raw -split '\r?\n')) {
+            $trimmed = $line.Trim()
+            if ($trimmed -and $trimmed -ne "edited" -and -not $list.Contains($trimmed)) {
+                $list.Add($trimmed)
+            }
+        }
+    }
+    return ,@($list.ToArray())
+}
+
+function Get-ProjectRelative([string]$Root, [string]$FilePath) {
+    try {
+        $rootFull = [System.IO.Path]::GetFullPath($Root)
+        $fileFull = [System.IO.Path]::GetFullPath($FilePath)
+        if (-not $rootFull.EndsWith([System.IO.Path]::DirectorySeparatorChar)) {
+            $rootFull = $rootFull + [System.IO.Path]::DirectorySeparatorChar
+        }
+        if ($fileFull.StartsWith($rootFull, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $fileFull.Substring($rootFull.Length)
+        }
+    } catch { }
+    return $FilePath
+}
+
+function Save-PlaceholderNote([string]$Root, [string]$WindowId, [string[]]$Paths) {
+    $slug = Get-PersonSlug (Get-GitName $Root)
+    if (-not $slug) { return }
+    $outputFull = Join-Path $Root (Get-OutputDir $Root)
+    if (Find-Note $outputFull $WindowId) { return }
+    $shown = New-Object System.Collections.Generic.List[string]
+    foreach ($path in @($Paths)) {
+        if (-not $path) { continue }
+        $shown.Add((Get-ProjectRelative $Root $path))
+        if ($shown.Count -ge 12) { break }
+    }
+    $extra = @($Paths).Count - $shown.Count
+    $lines = New-Object System.Collections.Generic.List[string]
+    $lines.Add("This window changed the project. The thought did not say what was tried or whether it worked.")
+    if ($shown.Count -gt 0) {
+        $lines.Add("")
+        foreach ($path in $shown) { $lines.Add("- $path") }
+        if ($extra -gt 0) { $lines.Add("- $extra more") }
+    }
+    $lines.Add("")
+    $lines.Add("<!-- hook:placeholder -->")
+    $paragraph = ($lines -join "`r`n").Trim()
+    Save-ThoughtNote $Root $WindowId "placeholder-$WindowId" @{
+        title = "Edit"
+        outcome = "partial"
+        paragraph = $paragraph
+    }
 }
 
 function Test-ChronologyEdit($Payload, [string]$Root) {
@@ -431,8 +505,13 @@ try {
         if (-not (Test-UnderOutput $filePath $outputFull)) {
             $dir = Split-Path -Parent $ledger
             if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-            $utf8 = New-Object System.Text.UTF8Encoding $false
-            [System.IO.File]::WriteAllText($ledger, "edited", $utf8)
+            $entry = Get-ProjectRelative $root $filePath
+            $known = New-Object System.Collections.Generic.List[string]
+            foreach ($item in @(Get-LedgerPaths $ledger)) {
+                if ($item) { $known.Add([string]$item) }
+            }
+            if (-not $known.Contains($entry)) { $known.Add($entry) }
+            Write-Utf8Lines $ledger $known.ToArray()
         }
         exit 0
     }
@@ -447,6 +526,17 @@ try {
     }
 
     if ($Event -eq "stop") {
+        $paths = New-Object System.Collections.Generic.List[string]
+        foreach ($item in @(Get-LedgerPaths $ledger)) {
+            if ($item) { $paths.Add([string]$item) }
+        }
+        $legacy = $false
+        if ((Test-Path -LiteralPath $ledger) -and $paths.Count -eq 0) {
+            $legacy = ([System.IO.File]::ReadAllText($ledger).Trim() -eq "edited")
+        }
+        if (($paths.Count -gt 0 -or $legacy) -and -not (Find-Note $outputFull $windowId)) {
+            Save-PlaceholderNote $root $windowId $paths.ToArray()
+        }
         Write-Json @{}
         exit 0
     }

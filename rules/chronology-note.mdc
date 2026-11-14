@@ -11,4 +11,4 @@ When this turn changed the project or reached a result, put one chronology block
 
 Do not write the transcript. Do not write a secret, a token, or the contents of an env file. The same window keeps the same file. At most two sections per UTC day. A missing `git config user.name` skips the note and does not invent a folder.
 
-The reply is only what was asked. It does not mention the note, the path, or a status line. When the person asked for the chronology note, the reply is the one line in the skill.
+The reply is only what was asked. It does not mention the note, the path, or a status line. When the person asked for the chronology note, the reply is the one line in the skill. `updated` is allowed only when this window id is already in a note file, and the number is that file's `<NNN>`. If the id is absent, the line is `ADRenaline chronology: missing note.` Do not choose the next number. `stop` writes one `partial` note when this window changed a file and no note exists. It does not send a follow-up. A later block in that window replaces that note.

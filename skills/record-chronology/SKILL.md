@@ -68,7 +68,15 @@ When the person asked for the chronology note, the reply is only this line. Do n
 ADRenaline chronology: updated 001, worked.
 ```
 
-`001` is that `<NNN>`. The last word is the outcome of the latest section. The line stays in English.
+`001` is the `<NNN>` of the note file that already contains this window id. Read that number from the file name or from its row in `STATUS.md`. The last word is the outcome of the latest section. The line stays in English.
+
+If this window id is not in a note file, do not print `updated` and do not choose the next number. The reply is only this line, and the block still goes in thinking:
+
+```text
+ADRenaline chronology: missing note.
+```
+
+On `stop`, if this window changed a file and no note exists yet, the hook writes one `partial` note. The paragraph says the thought did not say what was tried. A later block in that same window replaces that note. `missing note` remains the reply when the person asks and the file is still absent: this turn has not stopped, or the hook did not see a file change.
 
 ## Done
 
@@ -80,7 +88,7 @@ Before you close, evaluate this list and the `## Done` list in the reference for
 - The artifact language matches the request. `STATUS.md` columns stay `N`, `archivo`, `estado`, `sustituye`, `notas`.
 - Every field the template requires is filled. No placeholder remains (`#…`, `<task>`, `TBD`, lorem ipsum). A field the reference tells you to leave blank until data arrives is blank on purpose, and the state is the one the reference names.
 - Nothing this skill forbids was added. The reference names what stays out.
-- The reply does not mention the note unless the person asked for the chronology note. In that case the reply is only `ADRenaline chronology: updated <NNN>, <outcome>.` A missing `git user.name`, when they asked for the note, is `ADRenaline chronology: skipped, missing git user.name.` Any other turn adds no chronology line. In Cursor the agent does not create or edit the chronology files. The block is only in thinking, and only when the turn qualifies.
+- The reply does not mention the note unless the person asked for the chronology note. In that case the reply is only `ADRenaline chronology: updated <NNN>, <outcome>.` `<NNN>` is the number of the note file that already contains this window id. If that file is absent, the reply is only `ADRenaline chronology: missing note.` and the next number is not chosen. A missing `git user.name`, when they asked for the note, is `ADRenaline chronology: skipped, missing git user.name.` Any other turn adds no chronology line. In Cursor the agent does not create or edit the chronology files. The block is only in thinking, and only when the turn qualifies.
 
 ## Example
 

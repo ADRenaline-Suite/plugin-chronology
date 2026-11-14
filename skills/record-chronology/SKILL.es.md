@@ -68,7 +68,15 @@ Si la persona pidió la nota de cronología, la respuesta es solo esta línea. N
 ADRenaline chronology: updated 001, worked.
 ```
 
-`001` es ese `<NNN>`. La última palabra es el resultado del último tramo. La línea se queda en inglés.
+`001` es el `<NNN>` del archivo de nota que ya contiene el id de esta ventana. Ese número se lee del nombre del archivo o de su fila en `STATUS.md`. La última palabra es el resultado del último tramo. La línea se queda en inglés.
+
+Si el id de esta ventana no está en un archivo de nota, no se imprime `updated` y no se elige el número siguiente. La respuesta es solo esta línea, y el bloque sigue yendo en el pensamiento:
+
+```text
+ADRenaline chronology: missing note.
+```
+
+En `stop`, si esta ventana cambió un archivo y aún no hay nota, el hook escribe una nota `partial`. El párrafo dice que el pensamiento no contó qué se intentó. Un bloque posterior de esa misma ventana sustituye esa nota. `missing note` sigue siendo la respuesta cuando la persona pregunta y el archivo aún no está: este turno no ha parado, o el hook no vio un cambio de archivo.
 
 ## Hecho
 
@@ -80,7 +88,7 @@ Antes de cerrar, evalúa esta lista y la lista `## Done` de la referencia de est
 - El idioma del artefacto coincide con el pedido. Las columnas de `STATUS.md` siguen `N`, `archivo`, `estado`, `sustituye`, `notas`.
 - Cada campo que la plantilla pide está lleno. No queda un hueco (`#…`, `<task>`, `TBD`, lorem ipsum).
 - No se añadió nada que este skill prohíbe. La referencia dice qué queda fuera.
-- La respuesta no menciona la nota, salvo que la persona haya pedido la nota de cronología. En ese caso la respuesta es solo `ADRenaline chronology: updated <NNN>, <outcome>.` Si falta `git user.name` y la pidió, la línea es `ADRenaline chronology: skipped, missing git user.name.` Cualquier otro turno no añade línea de cronología. En Cursor el agente no crea ni edita los archivos de cronología. El bloque va solo en el pensamiento, y solo cuando el turno califica.
+- La respuesta no menciona la nota, salvo que la persona haya pedido la nota de cronología. En ese caso la respuesta es solo `ADRenaline chronology: updated <NNN>, <outcome>.` `<NNN>` es el número del archivo de nota que ya contiene el id de esta ventana. Si ese archivo no está, la respuesta es solo `ADRenaline chronology: missing note.` y no se elige el número siguiente. Si falta `git user.name` y la pidió, la línea es `ADRenaline chronology: skipped, missing git user.name.` Cualquier otro turno no añade línea de cronología. En Cursor el agente no crea ni edita los archivos de cronología. El bloque va solo en el pensamiento, y solo cuando el turno califica.
 
 ## Ejemplo
 

@@ -88,3 +88,4 @@ Set git user.name and ask again for the chronology note. Window id: #…
 - `<NNN>` is the next free number in that person's folder, or the number the existing window comment already had.
 - The `STATUS.md` row for this file is `accepted`, `sustituye` is empty, and `notas` has `window:`, `outcome:`, and `at:` with no `|`.
 - A turn that did not change the project and did not reach a result wrote no file, added no chronology line, and put no block in thinking. In Cursor the agent did not create or edit the chronology files.
+- A line that says `updated` uses the `<NNN>` of the file that already contains this window id. No such file means the line was `ADRenaline chronology: missing note.` and no next number was chosen.
